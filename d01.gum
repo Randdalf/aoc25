@@ -1,0 +1,28 @@
+import aoc
+
+fn rotate(dial, rot):
+    # Would use math.mod but it uses C % which is a remainder not a modulo.
+    dial += rot
+    while dial > 99:
+        dial -= 100
+    while dial < 0:
+        dial += 100
+    return dial
+
+export fn part1(input):
+    password = 0
+    dial = 50
+    for line in input.split("\r\n"):
+        rot = int(line[1...line.len()])
+        if line[0] == "L":
+            dial = rotate(dial, rot)
+        else:
+            dial = rotate(dial, -rot)
+        password += int(dial == 0)
+    return password
+
+export fn part2(input):
+    pass
+
+if is_main():
+    aoc.solve(1, part1, part2)
