@@ -24,3 +24,4 @@ test(1, 2, d01.part2, 1, 6)
 # Day 2
 import d02
 test(2, 1, d02.part1, 1, 1227775554)
+test(2, 2, d02.part2, 1, 4174379265)

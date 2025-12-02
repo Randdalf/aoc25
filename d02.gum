@@ -1,61 +1,51 @@
 import aoc
 
-digits = []
-for digit in 0..9:
-    digits.add("{digit}")
+fn find_invalid_ids(start, end):
+    invalid_ids = {}
 
-fn find_invalid_ids(start_digits, end_digits):
-    invalid_ids = []
-
-    start = int(start_digits)
-    end = int(end_digits)
-    num_start_digits = start_digits.len()
-    num_end_digits = end_digits.len()
-
-    id_digits = []
-
-    # Recursively search the space of repeated ids.
-    fn search():
-        # Check whether the repeated id is within range once.
-        n = 2 * id_digits.num()
-        if n >= num_start_digits:
-            id_digits_str = "".join(id_digits)
-            id = int(id_digits_str + id_digits_str)
-
-            # Check whether the repeated id is too large.
+    # Recursively search over the space of "base ids" and repeat them to test if
+    # they fit within the given range.
+    fn search(base_id, pow10):
+        # Test if repetitions of the base id fit within the ranges.
+        if base_id > 0:
+            repeats = 1
+            id = base_id * pow10 + base_id
             if id > end:
                 return
 
-            # Check whether the repeated id is within range: if so - it's invalid.
-            if id >= start and id <= end:
-                invalid_ids.add(id)
+            while id <= end:
+                if id >= start:
+                    invalid_ids.add(id, repeats)
+                id = id * pow10 + base_id
+                repeats += 1
 
-        # Don't bother trying longer ids if it would push us over the limit.
-        if n + 2 > num_end_digits:
-            return
+        # Test appending further digits to the base id.
+        for digit in 0..9:
+            search(base_id * 10 + digit, pow10 * 10)
 
-        # Recursively test adding more digits to the buffer.
-        for digit in digits:
-            if n == 0 and digit == "0":
-                continue
-            id_digits.add(digit)
-            search()
-            id_digits.pop()
+    for base_id in 1..9:
+        search(base_id, 10)
 
-    search()
     return invalid_ids
 
-
-export fn part1(input):
+fn solve(input, limit):
     result = 0
     for range in input.split(","):
         ends = range.split("-")
-        for invalid_id in find_invalid_ids(ends[0], ends[1]):
-            result += invalid_id
+        start = int(ends[0])
+        end = int(ends[1])
+        invalid_ids = find_invalid_ids(start, end)
+        for id in invalid_ids:
+            repeats = invalid_ids[id]
+            if not limit or repeats == 1:
+                result += id
     return result
 
+export fn part1(input):
+    return solve(input, true)
+
 export fn part2(input):
-    pass
+    return solve(input, false)
 
 if is_main():
     aoc.solve(2, part1, part2)
