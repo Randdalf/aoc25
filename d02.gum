@@ -8,11 +8,11 @@ fn find_invalid_ids(start, end):
     fn search(base_id, pow10):
         # Test if repetitions of the base id fit within the ranges.
         if base_id > 0:
-            repeats = 1
             id = base_id * pow10 + base_id
             if id > end:
                 return
 
+            repeats = 1
             while id <= end:
                 if id >= start:
                     invalid_ids.add(id, repeats)
