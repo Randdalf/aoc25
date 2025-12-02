@@ -1,0 +1,61 @@
+import aoc
+
+digits = []
+for digit in 0..9:
+    digits.add("{digit}")
+
+fn find_invalid_ids(start_digits, end_digits):
+    invalid_ids = []
+
+    start = int(start_digits)
+    end = int(end_digits)
+    num_start_digits = start_digits.len()
+    num_end_digits = end_digits.len()
+
+    id_digits = []
+
+    # Recursively search the space of repeated ids.
+    fn search():
+        # Check whether the repeated id is within range once.
+        n = 2 * id_digits.num()
+        if n >= num_start_digits:
+            id_digits_str = "".join(id_digits)
+            id = int(id_digits_str + id_digits_str)
+
+            # Check whether the repeated id is too large.
+            if id > end:
+                return
+
+            # Check whether the repeated id is within range: if so - it's invalid.
+            if id >= start and id <= end:
+                invalid_ids.add(id)
+
+        # Don't bother trying longer ids if it would push us over the limit.
+        if n + 2 > num_end_digits:
+            return
+
+        # Recursively test adding more digits to the buffer.
+        for digit in digits:
+            if n == 0 and digit == "0":
+                continue
+            id_digits.add(digit)
+            search()
+            id_digits.pop()
+
+    search()
+    return invalid_ids
+
+
+export fn part1(input):
+    result = 0
+    for range in input.split(","):
+        ends = range.split("-")
+        for invalid_id in find_invalid_ids(ends[0], ends[1]):
+            result += invalid_id
+    return result
+
+export fn part2(input):
+    pass
+
+if is_main():
+    aoc.solve(2, part1, part2)
