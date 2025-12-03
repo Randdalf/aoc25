@@ -1,0 +1,27 @@
+import aoc
+
+export fn part1(input):
+    out_jolts = 0
+
+    for line in input.split("\r\n"):
+        bank = []
+        for c in line:
+            bank.add(int(c))
+
+        max_jolts = 0
+        for i in 0...(bank.num() - 1):
+            base_jolts = 10 * bank[i]
+            for j in (i+1)...bank.num():
+                jolts = base_jolts + bank[j]
+                if jolts > max_jolts:
+                    max_jolts = jolts
+
+        out_jolts += max_jolts
+
+    return out_jolts
+
+export fn part2(input):
+    pass
+
+if is_main():
+    aoc.solve(3, part1, part2)
