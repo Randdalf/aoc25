@@ -12,7 +12,7 @@ fn find_max_jolts(bank, n):
             if jolts > max_jolts:
                 max_i = i
                 max_jolts = jolts
-        result = result * 10  + max_jolts
+        result = result * 10 + max_jolts
         start = max_i + 1
     return result
 
