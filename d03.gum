@@ -1,27 +1,53 @@
 import aoc
 
-export fn part1(input):
-    out_jolts = 0
+fn find_max_jolts(bank, n):
+    cache = {}
+    bank_size = bank.num()
 
+    # Precompute powers of 10 to allow fast digit prepending.
+    pow10s = []
+    k = 1
+    for i in 0..n:
+        pow10s.add(k)
+        k *= 10
+
+    fn search(start, n):
+        # The maximum joltage is zero with no batteries.
+        if n == 0:
+            return 0
+
+        # Memoize the largest joltage given a sub-range and a battery count.
+        key = (start, n)
+        if key in cache:
+            return cache[key]
+
+        # Find the battery which produces the largest joltage in this context.
+        max_jolts = 0
+        pow10 = pow10s[n - 1]
+        for i in start...(bank_size - n + 1):
+            jolts = bank[i] * pow10 + search(i + 1, n - 1)
+            if jolts > max_jolts:
+                max_jolts = jolts
+        
+        cache[key] = max_jolts
+        return max_jolts
+
+    return search(0, n) 
+
+fn solve(input, n):
+    out_jolts = 0
     for line in input.split("\r\n"):
         bank = []
         for c in line:
             bank.add(int(c))
-
-        max_jolts = 0
-        for i in 0...(bank.num() - 1):
-            base_jolts = 10 * bank[i]
-            for j in (i+1)...bank.num():
-                jolts = base_jolts + bank[j]
-                if jolts > max_jolts:
-                    max_jolts = jolts
-
-        out_jolts += max_jolts
-
+        out_jolts += find_max_jolts(bank, n)
     return out_jolts
 
+export fn part1(input):
+    return solve(input, 2)
+
 export fn part2(input):
-    pass
+    return solve(input, 12)
 
 if is_main():
     aoc.solve(3, part1, part2)

@@ -29,3 +29,4 @@ test(2, 2, d02.part2, 1, 4174379265)
 # Day 3
 import d03
 test(3, 1, d03.part1, 1, 357)
+test(3, 2, d03.part2, 1, 3121910778619)
