@@ -1,38 +1,20 @@
 import aoc
 
 fn find_max_jolts(bank, n):
-    cache = {}
     bank_size = bank.num()
-
-    # Precompute powers of 10 to allow fast digit prepending.
-    pow10s = []
-    k = 1
-    for i in 0..n:
-        pow10s.add(k)
-        k *= 10
-
-    fn search(start, n):
-        # The maximum joltage is zero with no batteries.
-        if n == 0:
-            return 0
-
-        # Memoize the largest joltage given a sub-range and a battery count.
-        key = (start, n)
-        if key in cache:
-            return cache[key]
-
-        # Find the battery which produces the largest joltage in this context.
+    result = 0
+    start = 0
+    for m in n...0:
+        max_i = 0
         max_jolts = 0
-        pow10 = pow10s[n - 1]
-        for i in start...(bank_size - n + 1):
-            jolts = bank[i] * pow10 + search(i + 1, n - 1)
+        for i in start...(bank.num() - m + 1):
+            jolts = bank[i]
             if jolts > max_jolts:
+                max_i = i
                 max_jolts = jolts
-        
-        cache[key] = max_jolts
-        return max_jolts
-
-    return search(0, n) 
+        result = result * 10  + max_jolts
+        start = max_i + 1
+    return result
 
 fn solve(input, n):
     out_jolts = 0
