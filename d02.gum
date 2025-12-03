@@ -7,17 +7,16 @@ fn find_invalid_ids(start, end):
     # they fit within the given range.
     fn search(base_id, pow10):
         # Test if repetitions of the base id fit within the ranges.
-        if base_id > 0:
-            id = base_id * pow10 + base_id
-            if id > end:
-                return
+        id = base_id * pow10 + base_id
+        if id > end:
+            return
 
-            repeats = 1
-            while id <= end:
-                if id >= start:
-                    invalid_ids.add(id, repeats)
-                id = id * pow10 + base_id
-                repeats += 1
+        repeats = 1
+        while id <= end:
+            if id >= start:
+                invalid_ids.add(id, repeats)
+            id = id * pow10 + base_id
+            repeats += 1
 
         # Test appending further digits to the base id.
         for digit in 0..9:
