@@ -1,6 +1,6 @@
 import aoc
 
-export fn part1(input):
+fn solve(input, limit):
     rolls = []
     lines = input.split("\r\n")
     width = 0
@@ -19,27 +19,37 @@ export fn part1(input):
     ]
         
     # Would rather use a set of tuples but they are breaking my VM :sad:
-    num_acccessible = 0
-    for x in 0...width:
-        for y in 0...height:
-            if not rolls[y][x]:
-                continue
-            num_adjs = 0
-            for offset in offsets:
-                ox = x + offset[0]
-                oy = y + offset[1]
-                if ox < 0 or ox >= width:
+    all_removals = []
+    while true:
+        removals = []
+        for x in 0...width:
+            for y in 0...height:
+                if not rolls[y][x]:
                     continue
-                if oy < 0 or oy >= height:
-                    continue
-                num_adjs += int(rolls[oy][ox])
-            if num_adjs < 4:
-                num_acccessible += 1
+                num_adjs = 0
+                for offset in offsets:
+                    ox = x + offset[0]
+                    oy = y + offset[1]
+                    if ox < 0 or ox >= width:
+                        continue
+                    if oy < 0 or oy >= height:
+                        continue
+                    num_adjs += int(rolls[oy][ox])
+                if num_adjs < 4:
+                    removals.add((x, y))
+        for r in removals:
+            rolls[r[1]][r[0]] = false
+            all_removals.add(r)
+        if limit or removals.num() == 0:
+            break
 
-    return num_acccessible
+    return all_removals.num()
+
+export fn part1(input):
+    return solve(input, true)
 
 export fn part2(input):
-    pass
+    return solve(input, false)
 
 if is_main():
     aoc.solve(4, part1, part2)
