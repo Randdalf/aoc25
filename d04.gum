@@ -1,0 +1,45 @@
+import aoc
+
+export fn part1(input):
+    rolls = []
+    lines = input.split("\r\n")
+    width = 0
+    height = lines.num()
+    for line in lines:
+        width = line.len()
+        row = []
+        for c in line:
+            row.add(c == "@")
+        rolls.add(row)
+
+    offsets = [
+        (-1, -1), (-1, 0), (-1, 1),
+        ( 0, -1),          ( 0, 1),
+        ( 1, -1), ( 1, 0), ( 1, 1)
+    ]
+        
+    # Would rather use a set of tuples but they are breaking my VM :sad:
+    num_acccessible = 0
+    for x in 0...width:
+        for y in 0...height:
+            if not rolls[y][x]:
+                continue
+            num_adjs = 0
+            for offset in offsets:
+                ox = x + offset[0]
+                oy = y + offset[1]
+                if ox < 0 or ox >= width:
+                    continue
+                if oy < 0 or oy >= height:
+                    continue
+                num_adjs += int(rolls[oy][ox])
+            if num_adjs < 4:
+                num_acccessible += 1
+
+    return num_acccessible
+
+export fn part2(input):
+    pass
+
+if is_main():
+    aoc.solve(4, part1, part2)
