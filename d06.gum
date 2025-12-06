@@ -1,0 +1,38 @@
+import aoc
+
+export fn part1(input):
+    lines = input.split("\r\n")
+
+    fn add(lhs, rhs):
+        return lhs + rhs
+
+    fn mul(lhs, rhs):
+        return lhs * rhs
+
+    operators = []
+    scratch = []
+    for operator in lines.pop().split(" "):
+        if operator == "+":
+            operators.add(add)
+            scratch.add(0)
+        elif operator == "*":
+            operators.add(mul)
+            scratch.add(1)
+
+    for line in lines:
+        i = 0
+        for operand in line.split(" "):
+            if operand.len() == 0: continue
+            scratch[i] = operators[i](scratch[i], int(operand))
+            i += 1
+
+    grand_total = 0
+    for n in scratch:
+        grand_total += n
+    return grand_total
+
+export fn part2(input):
+    pass
+
+if is_main():
+    aoc.solve(6, part1, part2)
