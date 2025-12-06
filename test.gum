@@ -35,3 +35,7 @@ test(3, 2, d03.part2, 1, 3121910778619)
 import d04
 test(4, 1, d04.part1, 1, 13)
 test(4, 2, d04.part2, 1, 43)
+
+# Day 5
+import d05
+test(5, 1, d05.part1, 1, 3)
