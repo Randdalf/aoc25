@@ -1,6 +1,6 @@
 import aoc
 
-export fn part1(input):
+fn solve(input, tranpose):
     lines = input.split("\r\n")
 
     fn add(lhs, rhs):
@@ -10,29 +10,65 @@ export fn part1(input):
         return lhs * rhs
 
     operators = []
-    scratch = []
+    identities = []
     for operator in lines.pop().split(" "):
         if operator == "+":
             operators.add(add)
-            scratch.add(0)
+            identities.add(0)
         elif operator == "*":
             operators.add(mul)
-            scratch.add(1)
+            identities.add(1)
 
-    for line in lines:
-        i = 0
-        for operand in line.split(" "):
-            if operand.len() == 0: continue
-            scratch[i] = operators[i](scratch[i], int(operand))
-            i += 1
+    batches = []
+    if tranpose:
+        # Transpose the lines whilst stripping whitespace.
+        transposed = []
+        for i in 0...lines[0].len():
+            transposed.add("")
+        for i in 0...lines.num():
+            line = lines[i]
+            for j in 0...line.len():
+                c = line[j]
+                if c == " ":
+                    continue
+                transposed[j] += line[j]
+
+        # Assemble the operand batches.
+        batch = []
+        for operand in transposed:
+            if operand.len() == 0:
+                batches.add(batch)
+                batch = []
+                continue
+            batch.add(int(operand))
+        batches.add(batch)
+    else:
+        for line in lines:
+            operands = line.split(" ")
+            i = 0
+            for operand in operands:
+                if operand.len() == 0:
+                    continue
+                if i >= batches.num():
+                    batches.add([])
+                batches[i].add(int(operand))
+                i += 1
 
     grand_total = 0
-    for n in scratch:
-        grand_total += n
+    for i in 0...batches.num():
+        scratch = identities[i]
+        operator = operators[i]
+        for operand in batches[i]:
+            scratch = operator(scratch, operand)
+        grand_total += scratch
+
     return grand_total
 
+export fn part1(input):
+    return solve(input, false)
+
 export fn part2(input):
-    pass
+    return solve(input, true)
 
 if is_main():
     aoc.solve(6, part1, part2)

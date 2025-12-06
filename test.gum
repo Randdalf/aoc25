@@ -44,3 +44,4 @@ test(5, 2, d05.part2, 1, 14)
 # Day 6
 import d06
 test(6, 1, d06.part1, 1, 4277556)
+test(6, 2, d06.part2, 1, 3263827)
