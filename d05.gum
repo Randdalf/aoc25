@@ -2,7 +2,7 @@ import aoc
 import math
 import sort for sort
 
-class id_range:
+class Range:
     init(start, end):
         self.start = start
         self.end = end
@@ -11,13 +11,16 @@ class id_range:
         return not ((other.end < self.start - 1) or (other.start > self.end + 1))
 
     fn merge(other):
-        return id_range(
+        return Range(
             math.min(self.start, other.start),
             math.max(self.end, other.end)
         )
 
     fn contains(id):
         return id >= self.start and id <= self.end
+
+    fn num():
+        return self.end - self.start + 1
     
     op <(lhs, rhs):
         return lhs.start < rhs.start
@@ -41,31 +44,39 @@ fn merge_ranges(ranges):
         merged.add(current)
     return merged
 
+class Database:
+    init(input):
+        parts = input.split("\r\n\r\n")
+
+        # Parse the ranges and merge them.
+        ranges = []
+        for line in parts[0].split("\r\n"):
+            ends = line.split("-")
+            ranges.add(Range(int(ends[0]), int(ends[1])))
+        self.ranges = merge_ranges(ranges)
+
+        # Parse the ids.
+        ids = []
+        for line in parts[1].split("\r\n"):
+            ids.add(int(line))
+        self.ids = ids
+
 export fn part1(input):
-    parts = input.split("\r\n\r\n")
-
-    # Parse the ranges.
-    ranges = []
-    for line in parts[0].split("\r\n"):
-        ends = line.split("-")
-        ranges.add(id_range(int(ends[0]), int(ends[1])))
-
-    # Merge overlapping ranges.
-    ranges = merge_ranges(ranges)
-
-    # Find the fresh ids
+    db = Database(input)
     num_fresh = 0
-    for line in parts[1].split("\r\n"):
-        id = int(line)
-        for range in ranges:
+    for id in db.ids:
+        for range in db.ranges:
             if range.contains(id):
                 num_fresh += 1
                 break
-        
     return num_fresh
 
 export fn part2(input):
-    pass
+    db = Database(input)
+    num_fresh = 0
+    for range in db.ranges:
+        num_fresh += range.num()
+    return num_fresh
 
 if is_main():
     aoc.solve(5, part1, part2)
