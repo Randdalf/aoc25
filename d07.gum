@@ -1,39 +1,58 @@
 import aoc
 
-export fn part1(input):
-    start = nil
-    splitters = {}
-    y = 0
-    for line in input.split("\r\n"):
-        x = 0
-        for c in line:
-            if c == "S":
-                start = (x, y)
-            elif c == "^":
-                splitters.add((x, y), nil)
-            x += 1
-        y += 1
-    max_y = y
+class Manifold:
+    init(input):
+        splitters = {}
+        y = 0
+        for line in input.split("\r\n"):
+            x = 0
+            for c in line:
+                if c == "S":
+                    self.start = (x, y)
+                elif c == "^":
+                    splitters.add((x, y), nil)
+                x += 1
+            y += 1
+        self.splitters = splitters
+        self.max_y = y
 
-    beams = {start: nil}
+export fn part1(input):
+    manifold = Manifold(input)
+    beams = {manifold.start: nil}
     splits = 0
-    for step in 0...max_y:
+    for step in 0...manifold.max_y:
         new_beams = {}
         for beam in beams:  
             x = beam[0]
             y = beam[1] + 1
-            if (x, y) in splitters:
+            if (x, y) in manifold.splitters:
                 splits += 1
                 new_beams.add((x - 1, y), nil)
                 new_beams.add((x + 1, y), nil)
             else:
                 new_beams.add((x, y), nil)
         beams = new_beams
-        
     return splits
 
 export fn part2(input):
-    pass
+    manifold = Manifold(input)
+    cache = {}
+    fn search(x, y):
+        if y == manifold.max_y:
+            return 1
+        key = (x, y)
+        if key in cache:
+            return cache[key]
+        y += 1
+        count = 0
+        if (x, y) in manifold.splitters:
+            count += search(x - 1, y)
+            count += search(x + 1, y)
+        else:
+            count += search(x, y)
+        cache[key] = count
+        return count
+    return search(manifold.start[0], manifold.start[1])
 
 if is_main():
     aoc.solve(7, part1, part2)
