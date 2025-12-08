@@ -1,0 +1,85 @@
+import aoc
+import sort for sort
+
+class JunctionBox:
+    init(x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.connections = []
+        self.visited = false
+
+    fn dist(other):
+        dx = self.x - other.x
+        dy = self.y - other.y
+        dz = self.z - other.z
+        return dx*dx + dy*dy + dz*dz
+
+    fn str():
+        return "{self.x},{self.y},{self.z}"
+
+class Dist:
+    init(i, j, value):
+        self.i = i
+        self.j = j
+        self.value = value
+    
+    op <(a, b):
+        return a.value < b.value
+
+export n = 1000
+
+export fn part1(input):
+    # Parse all the junction boxes.
+    jbs = []
+    for line in input.split("\r\n"):
+        comps = line.split(",")
+        x = int(comps[0])
+        y = int(comps[1])
+        z = int(comps[2])
+        jbs.add(JunctionBox(x, y, z))
+
+    # Calculate the distance between each unique pair of junction boxes and then
+    # sort them by distance.
+    dists = []
+    for i in 0...jbs.num():
+        for j in (i+1)...jbs.num():
+            dists.add(Dist(i, j, jbs[i].dist(jbs[j])))
+    sort(dists)
+
+    # Add connections between the closest n pairs of junction boxes.
+    for step in 0...n:
+        dist = dists[step]
+        jbs[dist.i].connections.add(dist.j)
+        jbs[dist.j].connections.add(dist.i)
+
+    # Determine the size of the circuits formed by the connections.
+    sizes = []
+    for i in 0...jbs.num():
+        root = jbs[i]
+        if root.visited:
+            continue
+        size = 0
+        pending = [root]
+        root.visited = true
+        while pending.num() > 0:
+            jb = pending.pop()
+            size += 1
+            for j in jb.connections:
+                neighbor = jbs[j]
+                if neighbor.visited:
+                    continue
+                neighbor.visited = true
+                pending.add(neighbor)
+        sizes.add(size)
+
+    # Multiple the three largest circuit sizes to get the result.
+    sort(sizes)
+    return sizes[-1] * sizes[-2] * sizes[-3]
+        
+
+export fn part2(input):
+    pass
+
+if is_main():
+    aoc.solve(8, part1, part2)

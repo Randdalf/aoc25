@@ -50,3 +50,8 @@ test(6, 2, d06.part2, 1, 3263827)
 import d07
 test(7, 1, d07.part1, 1, 21)
 test(7, 2, d07.part2, 1, 40)
+
+# Day 8
+import d08
+d08.n = 10
+test(8, 1, d08.part1, 1, 40)
