@@ -7,7 +7,6 @@ class JunctionBox:
         self.y = y
         self.z = z
         self.connections = []
-        self.visited = false
 
     fn dist(other):
         dx = self.x - other.x
@@ -23,63 +22,80 @@ class Dist:
         self.i = i
         self.j = j
         self.value = value
+
+    fn connect(jbs):
+        jbs[self.i].connections.add(self.j)
+        jbs[self.j].connections.add(self.i)
     
     op <(a, b):
         return a.value < b.value
 
+class Playground:
+    init(input):
+        # Parse all the junction boxes.
+        jbs = []
+        for line in input.split("\r\n"):
+            comps = line.split(",")
+            x = int(comps[0])
+            y = int(comps[1])
+            z = int(comps[2])
+            jbs.add(JunctionBox(x, y, z))
+
+        # Calculate the distance between each unique pair of junction boxes and then
+        # sort them by distance.
+        dists = []
+        for i in 0...jbs.num():
+            for j in (i+1)...jbs.num():
+                dists.add(Dist(i, j, jbs[i].dist(jbs[j])))
+        sort(dists)
+
+        self.jbs = jbs
+        self.dists = dists
+
 export n = 1000
 
-export fn part1(input):
-    # Parse all the junction boxes.
-    jbs = []
-    for line in input.split("\r\n"):
-        comps = line.split(",")
-        x = int(comps[0])
-        y = int(comps[1])
-        z = int(comps[2])
-        jbs.add(JunctionBox(x, y, z))
+fn get_circuit_size(jbs, root, visited):
+    size = 0
+    visited.add(root, nil)
+    pending = [root]
+    while pending.num() > 0:
+        size += 1
+        for j in jbs[pending.pop()].connections:
+            if j in visited:
+                continue
+            visited.add(j, nil)
+            pending.add(j)
+    return size
 
-    # Calculate the distance between each unique pair of junction boxes and then
-    # sort them by distance.
-    dists = []
-    for i in 0...jbs.num():
-        for j in (i+1)...jbs.num():
-            dists.add(Dist(i, j, jbs[i].dist(jbs[j])))
-    sort(dists)
+export fn part1(input):
+    pg = Playground(input)
+    jbs = pg.jbs
+    dists = pg.dists
 
     # Add connections between the closest n pairs of junction boxes.
     for step in 0...n:
-        dist = dists[step]
-        jbs[dist.i].connections.add(dist.j)
-        jbs[dist.j].connections.add(dist.i)
+        dists[step].connect(jbs)
 
     # Determine the size of the circuits formed by the connections.
     sizes = []
+    visited = {}
     for i in 0...jbs.num():
-        root = jbs[i]
-        if root.visited:
-            continue
-        size = 0
-        pending = [root]
-        root.visited = true
-        while pending.num() > 0:
-            jb = pending.pop()
-            size += 1
-            for j in jb.connections:
-                neighbor = jbs[j]
-                if neighbor.visited:
-                    continue
-                neighbor.visited = true
-                pending.add(neighbor)
-        sizes.add(size)
+        sizes.add(get_circuit_size(jbs, i, visited))
 
     # Multiple the three largest circuit sizes to get the result.
     sort(sizes)
     return sizes[-1] * sizes[-2] * sizes[-3]
-        
 
 export fn part2(input):
-    pass
+    pg = Playground(input)
+    jbs = pg.jbs
+    dists = pg.dists
+
+    # Add connections until the graph is complete.
+    for dist in dists:
+        dist.connect(jbs)
+        if get_circuit_size(jbs, 0, {}) == jbs.num():
+            return jbs[dist.i].x * jbs[dist.j].x
 
 if is_main():
     aoc.solve(8, part1, part2)
