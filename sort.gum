@@ -3,22 +3,30 @@ fn swap(list, i0, i1):
     list[i0] = list[i1]
     list[i1] = temp
 
-fn partition(list, lo_index, hi_index):
-    pivot = list[hi_index]
-    pivot_index = lo_index - 1
-    for test_index in lo_index...hi_index:
-        if list[test_index] <= pivot:
-            pivot_index += 1
-            swap(list, pivot_index, test_index)
-    pivot_index += 1
-    swap(list, pivot_index, hi_index)
-    return pivot_index
+fn partition(list, lo, hi):
+    pivot = list[lo]
+    i = lo - 1
+    j = hi + 1
 
-fn quick_sort(list, lo_index, hi_index):
-    if lo_index >= hi_index or lo_index < 0: return
-    pivot_index = partition(list, lo_index, hi_index)
-    quick_sort(list, lo_index, pivot_index - 1)
-    quick_sort(list, pivot_index + 1, hi_index)
+    while true:
+        i += 1
+        while list[i] < pivot:
+            i += 1
+
+        j -= 1
+        while list[j] > pivot:
+            j -= 1
+
+        if i >= j:
+            return j
+
+        swap(list, i, j)
+
+fn quicksort(list, lo, hi):
+    if lo >= 0 and hi >= 0 and lo < hi:
+        p = partition(list, lo, hi)
+        quicksort(list, lo, p)
+        quicksort(list, p + 1, hi)
 
 export fn sort(list):
-    quick_sort(list, 0, list.num() - 1)
+    quicksort(list, 0, list.num() - 1)
