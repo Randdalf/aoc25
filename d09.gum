@@ -1,0 +1,30 @@
+import aoc
+import math for abs
+
+class Tile:
+    init(x, y):
+        self.x = x
+        self.y = y
+
+export fn part1(input):
+    tiles = []
+    for line in input.split("\r\n"):
+        comps = line.split(",")
+        tiles.add(Tile(int(comps[0]), int(comps[1])))
+    
+    max_area = 0
+    for i in 0...tiles.num():
+        for j in (i+1)...tiles.num():
+            tile_i = tiles[i]
+            tile_j = tiles[j]
+            area = (abs(tile_j.x - tile_i.x) + 1) * (abs(tile_j.y - tile_i.y) + 1)
+            if area > max_area:
+                max_area = area
+
+    return max_area
+
+export fn part2(input):
+    pass
+
+if is_main():
+    aoc.solve(9, part1, part2)
