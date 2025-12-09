@@ -1,30 +1,200 @@
 import aoc
-import math for abs
+import math
+import sort for sort
 
 class Tile:
     init(x, y):
         self.x = x
         self.y = y
 
-export fn part1(input):
+    fn min(other):
+        return Tile(math.min(self.x, other.x), math.min(self.y, other.y))
+
+    fn max(other):
+        return Tile(math.max(self.x, other.x), math.max(self.y, other.y))
+
+fn to_tiles(input):
     tiles = []
     for line in input.split("\r\n"):
         comps = line.split(",")
         tiles.add(Tile(int(comps[0]), int(comps[1])))
-    
+    return tiles
+
+fn calc_area(a, b):
+    return (math.abs(b.x - a.x) + 1) * (math.abs(b.y - a.y) + 1)
+
+export fn part1(input):
+    tiles = to_tiles(input)
     max_area = 0
     for i in 0...tiles.num():
         for j in (i+1)...tiles.num():
-            tile_i = tiles[i]
-            tile_j = tiles[j]
-            area = (abs(tile_j.x - tile_i.x) + 1) * (abs(tile_j.y - tile_i.y) + 1)
+            area = calc_area(tiles[i], tiles[j])
             if area > max_area:
                 max_area = area
-
     return max_area
 
+fn squeeze(tiles):
+    # Deduplicate xs and ys.
+    xs = {}
+    ys = {}
+    for tile in tiles:
+        xs.add(tile.x, nil)
+        ys.add(tile.y, nil)
+
+    # Sort the keys in order.
+    fn to_sorted_array(dict):
+        keys = []
+        for key in dict:
+            keys.add(key)
+        sort(keys)
+        return keys
+
+    xs = to_sorted_array(xs)
+    ys = to_sorted_array(ys)
+
+    # Squeeze the tiles in each axis by remapping their coords based on the
+    # sorted axis values. Could use O(log n) binary search, but the arrays
+    # are pretty short in practice.
+    fn remap(v, vs):
+        for i in 0...vs.num():
+            if vs[i] == v:
+                return 2 * i
+
+    squeezed = []
+    for tile in tiles:
+        squeezed.add(Tile(remap(tile.x, xs), remap(tile.y, ys)))
+
+    return squeezed
+
 export fn part2(input):
-    pass
+    tiles = to_tiles(input)
+
+    # Remove redundant rows/columns to significantly reduce the size of the
+    # space without altering the geometric relationship between the red tiles.
+    squeezed = squeeze(tiles)
+
+    # Find the tiles on the edges of the loop.
+    x_max = 0
+    y_max = 0
+
+    for tile in squeezed:
+        x_max = math.max(tile.x, x_max)
+        y_max = math.max(tile.y, y_max)
+
+    inside = {}
+
+    fn row_major(x, y):
+        return (x_max + 1) * y + x
+
+    for i in 0...squeezed.num():
+        start = squeezed[i]
+        end = squeezed[math.mod(i + 1, squeezed.num())]
+
+        inside.add(row_major(start.x, start.y), nil)
+
+        if start.x != end.x:
+            x = start.x
+            dx = math.sign(end.x - start.x)
+            while x != end.x:
+                x += dx
+                inside.add(row_major(x, start.y), nil)
+        elif start.y != end.y:
+            y = start.y
+            dy = math.sign(end.y - start.y)
+            while y != end.y:
+                y += dy
+                inside.add(row_major(start.x, y), nil)
+
+    # Find a tile that is inside the loop by working out the number of lines
+    # crossed when tracing leftwards. (Odd = inside, even = outside.)
+    first = squeezed[0]
+    candidates = [
+        Tile(first.x - 1, first.y - 1),
+        Tile(first.x - 1, first.y + 1),
+        Tile(first.x + 1, first.y - 1),
+        Tile(first.x + 1, first.y + 1)
+    ]
+    root = nil
+    for candidate in candidates:
+        x = candidate.x
+        y = candidate.y
+        if x < 0 or x >= x_max or y < 0 or y >= y_max:
+            continue
+        id = row_major(x, y)
+        crossed = 0
+        while x >= 0:
+            if id in inside:
+                crossed += 1
+            x -= 1
+            id -= 1
+        if math.mod(crossed, 2) == 1:
+            root = candidate
+            break
+
+    # Flood fill inside the loop.
+    pending = [root]
+    while pending.num() > 0:
+        tile = pending.pop()
+        x = tile.x
+        y = tile.y
+
+        # Left
+        if x >= 0:
+            id = row_major(x - 1, y)
+            if not inside.contains(id):
+                inside.add(id, nil)
+                pending.add(Tile(x - 1, y))
+
+        # Right
+        if x < x_max - 1:
+            id = row_major(x + 1, y)
+            if not inside.contains(id):
+                inside.add(id, nil)
+                pending.add(Tile(x + 1, y))
+
+        # Up
+        if y >= 0:
+            id = row_major(x, y - 1)
+            if not inside.contains(id):
+                inside.add(id, nil)
+                pending.add(Tile(x, y - 1))
+
+        # Down
+        if y < y_max - 1:
+            id = row_major(x, y + 1)
+            if not inside.contains(id):
+                inside.add(id, nil)
+                pending.add(Tile(x, y + 1))
+
+    # Print the squeezed tiles.
+    if false:
+        for y in 0..y_max:
+            line = ""
+            for x in 0..x_max:
+                id = row_major(x, y)
+                if id in inside:
+                    line += "#"
+                else:
+                    line += "."
+            print(line)
+
+    # Iterate over potential rects, checking if all its squeezed tiles are inside.
+    fn is_rect_inside(a, b):
+        r_min = a.min(b)
+        r_max = a.max(b)
+        for x in r_min.x..r_max.x:
+            for y in r_min.y..r_max.y:
+                if not inside.contains(row_major(x, y)):
+                    return false
+        return true
+
+    max_area = 0
+    for i in 0...tiles.num():
+        for j in (i+1)...tiles.num():
+            area = calc_area(tiles[i], tiles[j])
+            if area > max_area and is_rect_inside(squeezed[i], squeezed[j]):
+                max_area = area
+    return max_area
 
 if is_main():
     aoc.solve(9, part1, part2)
