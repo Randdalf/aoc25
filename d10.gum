@@ -1,0 +1,97 @@
+import aoc
+import pathfind for dijkstra
+
+fn parse_lights(input):
+    at = input.find("[") + 1
+    lights = []
+    while true:
+        c = input[at]
+        if c == "#":
+            lights.add(true)
+        elif c == ".":
+            lights.add(false)
+        else:
+            break
+        at += 1
+    return lights
+
+fn parse_buttons(input):
+    buttons = []
+    while true:
+        start = input.find("(")
+        if start == nil:
+            break
+        start += 1
+        at = start
+        while input[at] != ")":
+            at += 1
+        button = []
+        for light_idx in input[start...at].split(","):
+            button.add(int(light_idx))
+        buttons.add(button)
+        input = input[at...input.len()]
+    return buttons
+
+fn lights_to_bin(lights):
+    bin = 0
+    for light in lights:
+        bin *= 2
+        if light:
+            bin += 1
+    return bin
+
+class Machine:
+    init(input):
+        self.lights = parse_lights(input)
+        self.lights_bin = lights_to_bin(self.lights)
+        self.buttons = parse_buttons(input)
+
+fn copy_lights(lights):
+    copy = []
+    copy.append(lights)
+    return copy
+
+class Node:
+    init(machine, lights):
+        self.machine = machine
+        self.lights = lights
+        self.lights_bin = lights_to_bin(lights)
+
+    fn key():
+        return self.lights_bin
+
+    fn get_neighbors():
+        neighbors = []
+        for button in self.machine.buttons:
+            lights = copy_lights(self.lights)
+            for i in button:
+                lights[i] = not lights[i]
+            neighbors.add(Node(self.machine, lights))
+        return neighbors
+
+    fn dist(neighbor):
+        return 1
+
+export fn part1(input):
+    min_presses = 0
+
+    for line in input.split("\r\n"):
+        machine = Machine(line)
+
+        all_off = []
+        for light in machine.lights:
+            all_off.add(false)
+        start = Node(machine, all_off)
+        
+        fn goal(node):
+            return node.lights_bin == machine.lights_bin
+            
+        min_presses += dijkstra(start, goal)
+
+    return min_presses
+
+export fn part2(input):
+    pass
+
+if is_main():
+    aoc.solve(10, part1, part2)
